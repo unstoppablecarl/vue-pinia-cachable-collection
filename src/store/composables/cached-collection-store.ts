@@ -15,6 +15,20 @@ export interface BaseCachedCollectionStore<Item, ItemCreate = object, ItemUpdate
     items_info_cache: Reactive<Map<number, ComputedRef<ItemInfo>>>
 }
 
+export interface MakeItemInfo<Item, ItemInfo> {
+    (item: Item, context: MakeItemContext<Item>): ItemInfo,
+}
+
+export interface MakeItem<Item, ItemCreate> {
+    (id: number, item: ItemCreate): Item,
+}
+
+export interface MakeItemContext<Item> {
+    items: Ref<Item[]>;
+    getIndex: (id: number) => number;
+    get: (id: number) => Item;
+}
+
 export function useCachedCollectionStore<
     Item extends { id: number },
     ItemCreate,
@@ -24,8 +38,8 @@ export function useCachedCollectionStore<
       makeItemInfo,
       makeItem
   }: {
-    makeItemInfo: (item: Item) => ItemInfo,
-    makeItem: (id: number, item: ItemCreate) => Item,
+    makeItemInfo: MakeItemInfo<Item, ItemInfo>
+    makeItem: MakeItem<Item, ItemCreate>
 }): BaseCachedCollectionStore<
     Item,
     ItemCreate,
@@ -43,8 +57,15 @@ export function useCachedCollectionStore<
     });
 
     function bindItem(item: Item): ComputedRef<ItemInfo> {
+
+        const context: MakeItemContext<Item> = {
+            get,
+            items,
+            getIndex
+        }
+
         let info = computed(() => {
-            return makeItemInfo(item);
+            return makeItemInfo(item, context);
         });
         items_info_cache.set(item.id, info);
         return info;
@@ -94,7 +115,8 @@ export function useCachedCollectionStore<
     function getInfo(itemId: number): ItemInfo {
         let info = items_info_cache.get(itemId);
         if (!info) {
-            info = bindItem(get(itemId));
+            const item = get(itemId);
+            info = bindItem(item);
         }
         return toValue(info);
     }

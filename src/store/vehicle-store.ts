@@ -1,5 +1,5 @@
 import {defineStore} from 'pinia';
-import {useCachedCollectionStore} from './composables/cached-collection-store.js';
+import {type MakeItemInfo, useCachedCollectionStore} from './composables/cached-collection-store.js';
 import {computed, readonly} from 'vue';
 
 export interface Vehicle {
@@ -11,6 +11,7 @@ export interface VehicleInfo {
     readonly id: number;
     readonly display_name: string;
     readonly display_name_len: number;
+    readonly display_order: number;
 }
 
 export interface VehicleCreate {
@@ -32,12 +33,12 @@ function makeItem(id: number, input: VehicleCreate): Vehicle {
     };
 }
 
-function makeItemInfo(item: Vehicle): VehicleInfo {
+const makeItemInfo: MakeItemInfo<Vehicle, VehicleInfo> = (item, {getIndex}) => {
     console.log('recomputing item info: ', item.id);
 
-    // trivial reduced case in place of a more substantial example
     return readonly({
         ...item,
+        display_order: computed(() => getIndex(item.id)),
         display_name_len: item.display_name.length,
     });
 }

@@ -38,10 +38,13 @@ function removeItem(id) {
         <strong>ID:</strong> {{ itemInfo.id }}
       </div>
       <div>
-        <strong> Name:</strong> {{ itemInfo.display_name }}
+        <strong>Name:</strong> {{ itemInfo.display_name }}
       </div>
       <div>
         <strong>Length:</strong> {{ itemInfo.display_name_len }}
+      </div>
+      <div>
+        <strong>Index:</strong> {{ itemInfo.display_order }}
       </div>
     </div>
   </div>
