@@ -28,7 +28,7 @@ function onSortableChange(event) {
       draggable=".list-item"
       tag="div"
       item-key="id"
-      group="things"
+      group="vehicles"
       handle=".btn-grab"
       ghost-class="ghost"
       @change="onSortableChange"
@@ -41,8 +41,8 @@ function onSortableChange(event) {
   </draggable>
 
   <button class="btn btn-primary my-2" @click="addItem('something')">Add</button>
-  <div class="fw-bold">Vehicles Info</div>
+  <div class="fw-bold"><code class="d-inline">vehicles_info</code> Array</div>
   <div v-for="info in vehicles_info" :key="info.id">
-    #{{ info.id }} {{ info.display_name }} ::: {{ info.display_name_len }}
+    {{info}}
   </div>
 </template>

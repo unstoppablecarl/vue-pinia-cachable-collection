@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia';
 import {useCachedCollectionStore} from './composables/cached-collection-store.js';
-import {readonly} from 'vue';
+import {computed, readonly} from 'vue';
 
 export interface Vehicle {
     readonly id: number;
@@ -21,9 +21,7 @@ export interface VehicleUpdate {
     display_name?: string;
 }
 
-
 function makeItem(id: number, input: VehicleCreate): Vehicle {
-
     const {
         display_name,
     } = input;
@@ -35,7 +33,7 @@ function makeItem(id: number, input: VehicleCreate): Vehicle {
 }
 
 function makeItemInfo(item: Vehicle): VehicleInfo {
-    console.log('recomputing: ', item.id);
+    console.log('recomputing item info: ', item.id);
 
     // trivial reduced case in place of a more substantial example
     return readonly({
@@ -53,8 +51,9 @@ export const useVehicleStore = defineStore('vehicles', () => {
             update,
             getInfo,
             items,
-            items_info,
         } = useVehicleCacheStore();
+
+        const vehicles_info = computed(() => items.map(item => getInfo(item.id)));
 
         return {
             getVehicle: get,
@@ -65,37 +64,16 @@ export const useVehicleStore = defineStore('vehicles', () => {
             moveVehicle: move,
 
             vehicles: items,
-            vehicles_info: items_info,
+            vehicles_info,
         };
     }
 );
 
 export const useVehicleCacheStore = defineStore('vehicles-cache', () => {
-        const {
-            get,
-            create,
-            move,
-            remove,
-            update,
-            getInfo,
-            items,
-            items_info,
-        } = useCachedCollectionStore<Vehicle, VehicleCreate, VehicleUpdate, VehicleInfo>({
+        return useCachedCollectionStore<Vehicle, VehicleCreate, VehicleUpdate, VehicleInfo>({
             makeItem,
             makeItemInfo,
         });
-
-        return {
-            get,
-            create,
-            move,
-            remove,
-            update,
-            getInfo,
-            items,
-            items_info,
-        }
-
     },
     {
         persist: {

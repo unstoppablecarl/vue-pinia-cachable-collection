@@ -8,11 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    BButton: typeof import('bootstrap-vue-next/components/BButton')['BButton']
-    ChangeVehicle: typeof import('./src/components/VehicleList/ChangeVehicle.vue')['default']
-    ManagePackages: typeof import('./src/components/VehicleList/ManagePackages.vue')['default']
     VehicleCollection: typeof import('./src/components/VehicleCollection.vue')['default']
     VehicleItem: typeof import('./src/components/VehicleItem.vue')['default']
-    VehicleList: typeof import('./src/components/VehicleList.vue')['default']
   }
 }

@@ -1,4 +1,4 @@
-import {computed, type ComputedRef, type Ref, ref, toValue} from 'vue';
+import {computed, type ComputedRef, type Reactive, reactive, type Ref, ref, toValue} from 'vue';
 import {watchArray} from '@vueuse/core';
 
 export interface BaseCachedCollectionStore<Item, ItemCreate = object, ItemUpdate = object, ItemInfo = object> {
@@ -11,8 +11,8 @@ export interface BaseCachedCollectionStore<Item, ItemCreate = object, ItemUpdate
     move: (id: number, newIndex: number) => void;
 
     items: Ref<Item[]>;
-    items_info: Ref<ItemInfo[]>;
     items_id_increment: Ref<number>;
+    items_info_cache: Reactive<Map<number, ComputedRef<ItemInfo>>>
 }
 
 export function useCachedCollectionStore<
@@ -33,7 +33,7 @@ export function useCachedCollectionStore<
     ItemInfo
 > {
     const items: Ref<Item[]> = ref([]);
-    const items_info_cache = new Map<number, ComputedRef<ItemInfo>>();
+    const items_info_cache = reactive(new Map<number, ComputedRef<ItemInfo>>());
     const items_id_increment = ref<number>(0);
 
     watchArray(items, (_newList, _oldList, _added, removed) => {
@@ -99,10 +99,6 @@ export function useCachedCollectionStore<
         return toValue(info);
     }
 
-    const items_info = computed(() => {
-        return items.value.map(item => getInfo(item.id));
-    });
-
     return {
         get,
         create,
@@ -112,7 +108,7 @@ export function useCachedCollectionStore<
         getInfo,
         getIndex,
 
-        items_info,
+        items_info_cache,
 
         items,
         items_id_increment,
