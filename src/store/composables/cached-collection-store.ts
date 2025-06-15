@@ -36,7 +36,7 @@ export function useCachedCollectionStore<
     const items_info_cache = new Map<number, ComputedRef<ItemInfo>>();
     const items_id_increment = ref<number>(0);
 
-    watchArray(items, (newList, oldList, added, removed) => {
+    watchArray(items, (_newList, _oldList, _added, removed) => {
         removed.forEach(item => {
             items_info_cache.delete(item.id);
         });
