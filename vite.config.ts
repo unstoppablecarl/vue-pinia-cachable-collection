@@ -6,7 +6,7 @@ import {BootstrapVueNextResolver} from 'bootstrap-vue-next'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
-    base: '/Steel-Rift-Hangar/',
+    base: '/vue-pinia-cachable-collection/',
     plugins: [
         vue(),
         vueDevTools(),
