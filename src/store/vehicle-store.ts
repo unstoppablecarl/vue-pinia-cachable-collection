@@ -4,7 +4,7 @@ import {computed, readonly} from 'vue';
 
 export interface Vehicle {
     readonly id: number;
-    readonly display_name: string;
+    display_name: string;
 }
 
 export interface VehicleInfo {

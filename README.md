@@ -1,5 +1,28 @@
-# Vue 3 + TypeScript + Vite
+# Collection Store Pattern for Vue, Pinia, TypeScript
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Case
+An array of objects with mutable data (representing records) in a pinia store.
+Each record has read only derived/computed data used by the app. 
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Requirements
+Reusable code with the ability to access the computed record data of each record without repeated or unnecessary re-computation of other records in the array.
+
+
+## Example
+This repo implements a trivial reduced case example where the `display_name_length` is the computed length of the `display_name` property. In practice this technique would be used for much more complex data.
+
+```ts
+export interface Vehicle {
+    readonly id: number;
+    display_name: string;
+}
+
+export interface VehicleInfo {
+    readonly id: number;
+    readonly display_name: string;
+    readonly display_name_length: number;
+}
+
+```
+
+Demo: [https://unstoppablecarl.github.io/vue-pinia-cachable-collection/](https://unstoppablecarl.github.io/vue-pinia-cachable-collection/)

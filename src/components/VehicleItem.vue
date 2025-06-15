@@ -11,13 +11,8 @@ const {itemId} = defineProps({
   },
 });
 
-const item = computed(() => {
-  return store.getVehicle(itemId);
-});
-
-const info = computed(() => {
-  return store.getVehicleInfo(itemId);
-});
+const item = computed(() => store.getVehicle(itemId));
+const itemInfo = computed(() => store.getVehicleInfo(itemId));
 
 function removeItem(id) {
   store.removeVehicle(id);
@@ -31,7 +26,6 @@ function removeItem(id) {
       <div class="row">
         <div class="col-auto">
           <span class="btn btn-secondary btn-sm btn-grab me-2">:::</span>
-
         </div>
         <div class="col-auto">
           <input class="form-control d-inline-block" v-model="item.display_name"/>
@@ -41,13 +35,13 @@ function removeItem(id) {
         </div>
       </div>
       <div>
-        <strong>ID:</strong> {{ info.id }}
+        <strong>ID:</strong> {{ itemInfo.id }}
       </div>
       <div>
-        <strong> Name:</strong> {{ info.display_name }}
+        <strong> Name:</strong> {{ itemInfo.display_name }}
       </div>
       <div>
-        <strong>Length:</strong> {{ info.display_name_len }}
+        <strong>Length:</strong> {{ itemInfo.display_name_len }}
       </div>
     </div>
   </div>
