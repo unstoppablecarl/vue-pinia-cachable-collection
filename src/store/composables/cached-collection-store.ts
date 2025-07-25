@@ -1,26 +1,8 @@
-import {computed, type ComputedRef, type Reactive, reactive, type Ref, ref, toValue} from 'vue';
+import {computed, type ComputedRef, readonly, type Ref, ref, toValue} from 'vue';
 import {watchArray} from '@vueuse/core';
 
-export interface BaseCachedCollectionStore<Item, ItemCreate = object, ItemUpdate = object, ItemInfo = object> {
-    get: (id: number) => Item;
-    create: (input: ItemCreate) => Item;
-    remove: (id: number) => void;
-    update: (id: number, obj: ItemUpdate) => Item;
-    getInfo: (id: number) => ItemInfo;
-    getIndex: (id: number) => number;
-    move: (id: number, newIndex: number) => void;
-
-    items: Ref<Item[]>;
-    items_id_increment: Ref<number>;
-    items_info_cache: Reactive<Map<number, ComputedRef<ItemInfo>>>
-}
-
-export interface MakeItemInfo<Item, ItemInfo> {
-    (item: Item, context: MakeItemContext<Item>): ItemInfo,
-}
-
-export interface MakeItem<Item, ItemCreate> {
-    (id: number, item: ItemCreate): Item,
+export interface HasId {
+    id: number;
 }
 
 export interface MakeItemContext<Item> {
@@ -30,25 +12,21 @@ export interface MakeItemContext<Item> {
 }
 
 export function useCachedCollectionStore<
-    Item extends { id: number },
-    ItemCreate,
-    ItemUpdate,
-    ItemInfo
+  Item extends HasId,
+  ItemCreate,
+  ItemUpdate,
+  ItemInfo,
+  ItemMake extends ItemCreate & HasId = ItemCreate & HasId
 >({
       makeItemInfo,
       makeItem
   }: {
-    makeItemInfo: MakeItemInfo<Item, ItemInfo>
-    makeItem: MakeItem<Item, ItemCreate>
-}): BaseCachedCollectionStore<
-    Item,
-    ItemCreate,
-    ItemUpdate,
-    ItemInfo
-> {
-    const items: Ref<Item[]> = ref([]);
-    const items_info_cache = reactive(new Map<number, ComputedRef<ItemInfo>>());
-    const items_id_increment = ref<number>(0);
+    makeItemInfo: (item: Item, context: MakeItemContext<Item>) => ItemInfo,
+    makeItem: (item: ItemMake) => Item
+}) {
+    const items = ref<Item[]>([]) as Ref<Item[]>;
+    const items_info_cache = new Map<number, ComputedRef<ItemInfo>>();
+    const items_id_increment = ref(0);
 
     watchArray(items, (_newList, _oldList, _added, removed) => {
         removed.forEach(item => {
@@ -56,28 +34,21 @@ export function useCachedCollectionStore<
         });
     });
 
-    function bindItem(item: Item): ComputedRef<ItemInfo> {
-
+    function bindItem(item: Item) {
         const context: MakeItemContext<Item> = {
             get,
             items,
             getIndex
         }
 
-        let info = computed(() => {
-            return makeItemInfo(item, context);
-        });
+        const info = computed(() => makeItemInfo(item, context));
         items_info_cache.set(item.id, info);
         return info;
     }
 
-    function create(input: ItemCreate): Item {
-        const id = items_id_increment.value++
-
-        const item: Item = makeItem(id, input);
+    function add(obj: ItemCreate) {
+        const item = make(obj)
         items.value.push(item);
-
-        return item;
     }
 
     function remove(itemId: number) {
@@ -86,15 +57,19 @@ export function useCachedCollectionStore<
         items.value.splice(index, 1);
     }
 
-    function update(id: number, input: ItemUpdate): Item {
+    function update(id: number, input: ItemUpdate) {
         const item = get(id);
 
         Object.assign(item, input);
-
-        return item
     }
 
-    function get(itemId: number): Item {
+    function make(input: ItemCreate) {
+        const id = items_id_increment.value++;
+
+        return makeItem({...input, id} as ItemMake);
+    }
+
+    function get(itemId: number) {
         const item = items.value.find(item => item.id === itemId);
         if (!item) {
             throw new Error(`Item: ${itemId} not found`);
@@ -102,37 +77,39 @@ export function useCachedCollectionStore<
         return item;
     }
 
-    function getIndex(itemId: number): number {
+    function getIndex(itemId: number) {
         return items.value.findIndex((item) => item.id === itemId);
     }
 
-    function move(itemId: number, toIndex: number): void {
+    function move(itemId: number, toIndex: number) {
         const fromIndex = getIndex(itemId);
         let item = items.value.splice(fromIndex, 1)[0];
         items.value.splice(toIndex, 0, item);
     }
 
-    function getInfo(itemId: number): ItemInfo {
+    function getInfo(itemId: number) {
         let info = items_info_cache.get(itemId);
         if (!info) {
-            const item = get(itemId);
-            info = bindItem(item);
+            info = bindItem(get(itemId) as Item);
         }
         return toValue(info);
     }
 
+    const items_info = computed(() => {
+        return items.value.map(item => getInfo(item.id));
+    });
+
     return {
         get,
-        create,
+        add,
         move,
         remove,
         update,
         getInfo,
         getIndex,
 
-        items_info_cache,
-
         items,
-        items_id_increment,
+        items_info,
+        items_id_increment: readonly(items_id_increment),
     };
 }
