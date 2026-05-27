@@ -1,4 +1,6 @@
-# Collection Store Pattern for Vue, Pinia, TypeScript
+## ⚠️This repo is a prototype/example for what later became https://github.com/unstoppablecarl/vue-cache-store
+
+## Collection Store Pattern for Vue, Pinia, TypeScript
 
 ## Case
 A Pinia store has an array of objects `items` with mutable data representing records.
